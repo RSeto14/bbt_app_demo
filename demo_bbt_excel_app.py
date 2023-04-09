@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import numpy as np
 from io import BytesIO
 
+st.write("demo用")
 # スプレッドシートの認証
 scopes = [ 'https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'
 ]
