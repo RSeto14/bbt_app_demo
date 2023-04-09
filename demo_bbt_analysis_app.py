@@ -237,9 +237,7 @@ if selected_games is not None:
             result_dakyu = ["ゴロ","ライナー","フライ","1BH","2BH","3BH","HR"]
 
             df_dakyu = df_b[df_b["結果"].str.contains("|".join(result_dakyu))]
-            #df_dakyu = df_dakyu[df_dakyu["結果"].str.contains("(")]
-            df_dakyu = df_dakyu[df_dakyu["結果"].str.contains(",")]
-            #df_dakyu = df_dakyu[df_dakyu["結果"].str.contains(")")]
+            df_dakyu = df_dakyu[df_dakyu["打球"].str.contains(",")]
             for i in range(len(df_dakyu)):
                 dakyu_list1 = df_dakyu["打球"][i].split("(")
                 if len(dakyu_list1) ==2:
