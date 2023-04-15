@@ -27,6 +27,8 @@ worksheet = sh.worksheet(SP_SHEET)
 data = worksheet.get_all_values() # シート内の全データを取得
 df = pd.DataFrame(data[1:], columns=data[0]) # 取得したデータをデータフレームに変換
 
+##################################################################################
+
 def df_to_xlsx(df):
     byte_xlsx = BytesIO()
     writer_xlsx = pd.ExcelWriter(byte_xlsx, engine="xlsxwriter")
@@ -41,6 +43,8 @@ def df_to_xlsx(df):
     workbook = writer_xlsx.book
     out_xlsx = byte_xlsx.getvalue()
     return out_xlsx
+
+###################################################################################
 
 
 tab1, tab2,tab3, tab4 = st.tabs(["Input", "Data", "DataBase Uploader", "DataBase Editer"])
@@ -243,8 +247,8 @@ with tab1:
         add = st.form_submit_button('ADD')
 
     with st.container():
-        dakyu1 = st.slider("飛距離", 0, 130, 0)
-        dakyu2 = st.slider("方向", -90, 90, 0)
+        dakyu1 = st.slider("飛距離", 0, 130, 0,key="hikyori1")
+        dakyu2 = st.slider("方向", -90, 90, 0,key="hoko1")
         dakyu3 =  "(" + str(dakyu1) + "," + str(dakyu2) + ")"
         fig = go.Figure()
         x1 = [-70,0, 70]
@@ -379,9 +383,14 @@ with tab2:
             if prev_list[14] != "":
                 prev_dakyu = prev_list[14].split("(")
                 prev_dakyu1 = prev_dakyu[0]
-                if prev_dakyu[1] != "":
+                if len(prev_dakyu)==2:
                     prev_dakyu2 = prev_dakyu[1].split(",")
-                    prev_dakyu2[1] = prev_dakyu2[1].replace(")", "")
+                    prev_dakyu2[1] = prev_dakyu2[1].replace(")", "",regex=True)
+                else:
+                    prev_dakyu2 = ["0","0"]
+            else:
+                prev_dakyu1 = ""
+                prev_dakyu2 = ["0","0"]
                 
             
             col1a, col1b, col2, col3, col4 = st.columns((1,1,2,2,2))
@@ -434,8 +443,8 @@ with tab2:
 
             edit = st.form_submit_button('Edit')
         with st.container():
-            dakyu4 = st.slider("飛距離", 0, 130, int(prev_dakyu2[0]))
-            dakyu5 = st.slider("方向", -90, 90, int(prev_dakyu2[1]))
+            dakyu4 = st.slider("飛距離", 0, 130, int(prev_dakyu2[0]),key="hikyori2")
+            dakyu5 = st.slider("方向", -90, 90, int(prev_dakyu2[1]),key="hoko2")
             dakyu6 =  "(" + str(dakyu4) + "," + str(dakyu5) + ")"
             fig = go.Figure()
             x1 = [-70,0, 70]
@@ -485,7 +494,14 @@ with tab3:
                 #print(ws_name_list)
                 if new_sheet_name not in ws_name_list:
                     df_data = pd.read_excel(uploaded_file)
+                    df_data = df_data.replace("　", "",regex=True)
+                    for i in range(10):
+                        num1 = ["０","１","２","３","４","５","６","７","８","９"]
+                        num2 = ["0","1","2","3","4","5","6","7","8","9"]
+                        df_data = df_data.replace(num1[i],num2[i],regex=True)
                     df_data = df_data.fillna("")
+                    df_data = df_data.replace({8,"・"},"-",regex=True)
+                    print(df_data)
                     data_list = df_data.to_numpy().tolist()
                     
                     label = ["回","攻撃","投手","捕手","打者","打","アウト","塁","B/S","構え","球速","球種","作戦","結果","打球","その他"]
@@ -576,10 +592,15 @@ with tab4:
 
                 if prev2_list[14] != "":
                     prev2_dakyu = prev2_list[14].split("(")
-                    prev2_dakyu1 = prev2_dakyu[0]
-                    if prev2_dakyu[1] != "":
+                    prev2_dakyu1 = prev2_dakyu[0] + ""
+                    if len(prev2_dakyu) == 2:
                         prev2_dakyu2 = prev2_dakyu[1].split(",")
-                        prev2_dakyu2[1] = prev2_dakyu2[1].replace(")", "")
+                        prev2_dakyu2[1] = prev2_dakyu2[1].replace(")", "",regex=True)
+                    else:
+                        prev2_dakyu2 = ["0","0"]
+                else:
+                    prev2_dakyu1 = ""
+                    prev2_dakyu2 = ["0","0"]
                     
                 
                 col1a, col1b, col2, col3, col4 = st.columns((1,1,2,2,2))
@@ -632,8 +653,8 @@ with tab4:
 
                 edit2 = st.form_submit_button('Edit')
             with st.container():
-                dakyu7 = st.slider("飛距離", 0, 130, int(prev2_dakyu2[0]))
-                dakyu8 = st.slider("方向", -90, 90, int(prev2_dakyu2[1]))
+                dakyu7 = st.slider("飛距離", 0, 130, int(prev2_dakyu2[0]), key="飛距離3")
+                dakyu8 = st.slider("方向", -90, 90, int(prev2_dakyu2[1]),key="方向3")
                 dakyu9 =  "(" + str(dakyu7) + "," + str(dakyu8) + ")"
                 fig = go.Figure()
                 x1 = [-70,0, 70]
