@@ -1,41 +1,32 @@
 import streamlit as st
-from google.oauth2 import service_account
-import gspread
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-from io import BytesIO
 
-st.write("demo用")
-# スプレッドシートの認証
-scopes = [ 'https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'
-]
-credentials = service_account.Credentials.from_service_account_file( 'bbtapp230403-715595753eb1.json', scopes=scopes
-)
-gc = gspread.authorize(credentials)
-# スプレッドシートからデータ取得
+input_book = pd.ExcelFile("BBTAPP_Demo_DataBase.xlsx")
 
-SP_SHEET_KEY2 = '12MyuKNAo7vszl7qOti3mNwHLiymsNH4AghzT5Ge8D2c'# スプレッドシートのキー
-sh2 = gc.open_by_key(SP_SHEET_KEY2)
+ws_list = input_book.sheet_names
 
-ws_list = sh2.worksheets()
-ws_name_list = []
-for i  in range(len(sh2.worksheets())):
-    ws_name_list.append(ws_list[i].title)
-game_list = ws_name_list[1:]
+game_list = input_book.sheet_names
 selected_games = st.multiselect("Games",game_list)
 
 if selected_games is not None:
-    all_data = []
-    for game in selected_games:
-        ws = sh2.worksheet(game)
-        data = ws.get_all_values() # シート内の全データを取得
-        all_data = all_data + data[1:]
     col = ["回","攻撃","投手","捕手","打者","打","アウト","塁","カウント","構え","球速","球種","作戦","結果","打球","その他"]
-    df_all = pd.DataFrame(all_data, columns=col)
+    df_all = pd.DataFrame([[""]*16],columns=col)
+
+    for game in selected_games:        
+        df_data = input_book.parse(game) 
+        df_data.columns = col
+        df_all = pd.concat([df_all, df_data],axis=0,ignore_index=True)
+    df_all = df_all.drop(df_all.index[[0]])
+    df_all = df_all.astype(str)
+    df_all = df_all[df_all['攻撃'] != "nan"]
+
+    
     teams = df_all["攻撃"].unique() 
+    
     teams =  [x for x in teams if pd.isnull(x) == False]
     selected_teams = st.multiselect("Team",teams)
     
